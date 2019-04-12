@@ -4,6 +4,10 @@
 void printMessage(const std::string &msg) {
   cout << "\r";
   auto tokens = split(msg, DELIM, 3);
+  if (tokens.size() != 3) {
+    cout << msg << endl;
+    return;
+  }
   auto &type = tokens[0], &sender = tokens[1], &text = tokens[2];
 
   if (type == "INFO") cout << color::yellow;

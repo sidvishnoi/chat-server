@@ -132,7 +132,8 @@ void handleMsg(
   const int currentClientFd,
   const ChatroomToFdList &chatRooms,
   const FdToName &clients,
-  string msg
+  string msg,
+  std::pair <bool, string> &receiverDetails
 );
 
 // get the `ip:port` for a given client

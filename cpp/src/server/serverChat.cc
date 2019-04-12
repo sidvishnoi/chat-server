@@ -7,6 +7,7 @@ int serverChat(int sockfd) {
   FdToName clients;
   ChatroomToFdList chatRooms;
   fd_set master;
+  std::pair <bool, string> receiverDetail (false, ""); 
 
   while (true) {
     FD_ZERO(&master);
@@ -36,7 +37,8 @@ int serverChat(int sockfd) {
       if (!FD_ISSET(currentClientFd, &master)) continue;
 
       std::fill_n(buffer, BUFFER_SIZE, '\0');
-      const int bytesRead = recv(currentClientFd, buffer, sizeof(buffer), 0);
+      // sizeof(buffer) - 1 to avoid garbage values
+      const int bytesRead = recv(currentClientFd, buffer, sizeof(buffer)-1, 0);
 
       bool connectionLost = (bytesRead <= 0);
       if (connectionLost) {
@@ -53,7 +55,7 @@ int serverChat(int sockfd) {
       string msg(buffer);
       auto type = getMessageType(msg);
       if (type == cmd::NOT_CMD) {
-        handleMsg(currentClientFd, chatRooms, clients, msg);
+        handleMsg(currentClientFd, chatRooms, clients, msg, receiverDetail);
         continue;
       }
 

@@ -46,7 +46,19 @@ int clientChat(int sockfd, const std::string &username) {
           chatroom = msgToSend.substr(1, pos - 1);
           msgToSend = msgToSend.substr(pos + 1);
         }
-        std::string msg = chatroom + DELIM + msgToSend;
+        auto index = msgToSend.find('@');
+        // send private message.
+        std::string receiverName;
+        if (index != std::string::npos) {
+          receiverName = msgToSend.substr(index + 1, msgToSend.substr(index + 1).find(' '));
+        }
+        std::string msg ;
+        if (receiverName != "") {
+          msg = chatroom + "@" + receiverName + DELIM + msgToSend;
+        }
+        else {
+          msg = chatroom + DELIM + msgToSend;
+        }
         send(sockfd, msg.c_str(), msg.size(), 0);
         continue;
       }
@@ -59,6 +71,14 @@ int clientChat(int sockfd, const std::string &username) {
         }
         case cmd::JOIN: {
           auto chatroom = split(msgToSend, " ", 2)[1].substr(1);
+          //Validate chatroom name
+          auto index = chatroom.find('@');
+          if (index != std::string::npos) {
+            printMessage(
+              "ERROR" + DELIM + "SYNTAX" + DELIM +
+              "Can't use @ symbol in chatroom name");
+            continue;  
+          }
           if (activeChatrooms.count(chatroom) != 0) {
             // if client has already joined the asked chatroom
             activeChatroom = chatroom;
@@ -107,6 +127,7 @@ int clientChat(int sockfd, const std::string &username) {
         return 0;
       }
       std::string receivedMsg(buffer);
+
       if (receivedMsg.find(DELIM) == 0) {
         // process response of request
         auto tokens = split(receivedMsg, DELIM, 2);
